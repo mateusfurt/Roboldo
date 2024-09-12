@@ -5,30 +5,37 @@ import numpy as np
 import pygame
 
 client = OpenAI()
+with open("template.txt", "r") as arquivo:
+    inicio = arquivo.read()
+
+
+historico = [{"role": "system", "content": inicio}]
 
 def generate_response(prompt):
+    historico.append({"role": "user", "content": prompt})
+    
+    # Envia o histórico de mensagens completo
     completion = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "você é o roboldo"},
-        {
-            "role": "user",
-            "content": prompt
-        }
-        ]
+        model="gpt-4o-mini",
+        messages=historico
     )
-
-    return completion.choices[0].message.content
+    
+    # Resposta gerada pela API
+    resposta = completion.choices[0].message.content
+    
+    # Adiciona a resposta do assistente ao histórico
+    historico.append({"role": "assistant", "content": resposta})
+    
+    return resposta
 
 
 def text_to_speech(text):
-    response = client.audio.speech.create(
+    with client.audio.speech.with_streaming_response.create(
         model="tts-1",
         voice="echo",
         input=text
-        )
-    response.stream_to_file("speech.mp3")
-
+    ) as response:
+        response.stream_to_file("speech.mp3")
 
 
 # Carregar as variáveis de ambiente do arquivo .env
@@ -89,6 +96,7 @@ def capture_audio(filename="mensagem.wav"):
         wf.setsampwidth(audio.get_sample_size(FORMAT))
         wf.setframerate(RATE)
         wf.writeframes(b''.join(frames))
+    
 
     return OUTPUT_FILENAME
 
@@ -111,19 +119,26 @@ def play_audio(filename):
         pygame.time.Clock().tick(10)
 
     print("Reprodução de áudio concluída!")
+    pygame.mixer.quit()
 
 def main():
+    while True:
+        continuar = input('digite "sair" para encerrar')
+        if continuar == "sair":
+            break
+        audio_file = capture_audio()
+        print("AUDIO GRAVADO")
+        transcription = transcribe_audio(audio_file)
+        print(f"Mensagem: {transcription}")
+        
+        
+        resposta = generate_response(transcription)
+        print(f"Resposta: {resposta}")
+        text_to_speech(resposta)
+        print("TEXTO PARA AUDIO")
+        play_audio('speech.mp3')
+        print("AUDIO REPRODUZIDO")
     
-    
-    audio_file = capture_audio()
-    transcription = transcribe_audio(audio_file)
-    print(f"Mensagem: {transcription}")
-    
-    
-    resposta = generate_response(transcription)
-    print(f"Resposta: {resposta}")
-    text_to_speech(resposta)
-    play_audio('speech.mp3')
 
 if __name__ == "__main__":
     main()
