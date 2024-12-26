@@ -3,7 +3,7 @@ import cv2
 from openai import OpenAI
 
 client = OpenAI()
-CLIENT_ID = ""
+CLIENT_ID = "e998866e6f8c481"
 IMAGE_PATH = "imagem.jpeg"
 DELETE_HASHES_FILE = "deletehashes.txt"
 
@@ -68,30 +68,30 @@ def delete_all_images():
         print("Arquivo de deletehashes.txt não encontrado.")
 
 
+def take_pic():
+    # Inicializa a captura da webcam
+    cam = cv2.VideoCapture(0)
 
+    # Captura uma imagem
+    res, imagem = cam.read()
 
-# Inicializa a captura da webcam
-cam = cv2.VideoCapture(0)
+    # Verifica se a captura foi bem-sucedida
+    if res:
+        # Exibe a imagem capturada
+        cv2.imshow("Foto", imagem)
+        
+        # Salva a imagem em um arquivo no disco
+        cv2.imwrite("foto_capturada.jpg", imagem)
+        print("Imagem salva como 'foto_capturada.jpg'")
+        
+        # Aguarda uma tecla para fechar a janela
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-# Captura uma imagem
-res, imagem = cam.read()
+    # Libera a câmera
+    cam.release()
 
-# Verifica se a captura foi bem-sucedida
-if res:
-    # Exibe a imagem capturada
-    cv2.imshow("Foto", imagem)
-    
-    # Salva a imagem em um arquivo no disco
-    cv2.imwrite("foto_capturada.jpg", imagem)
-    print("Imagem salva como 'foto_capturada.jpg'")
-    
-    # Aguarda uma tecla para fechar a janela
-    cv2.waitKey(1)
-    cv2.destroyAllWindows()
-
-# Libera a câmera
-cam.release()
-
+take_pic()
 # Exemplo de uso
 link = upload_image("foto_capturada.jpg")  # Faz o upload e salva o deletehash
 #delete_all_images()       # Deleta todas as imagens e limpa a lista
