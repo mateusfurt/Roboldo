@@ -245,7 +245,7 @@ def detect_wake_word(wake_word):
 
     while True:
         with mic as source:
-            audio = recognizer.listen(source, phrase_time_limit=2)  # Limite de 3 segundos por trecho
+            audio = recognizer.listen(source, phrase_time_limit=3)  # Limite de 3 segundos por trecho
 
         try:
             # Transcrição usando a API do Google
@@ -253,10 +253,8 @@ def detect_wake_word(wake_word):
             print(f"Você disse: {transcription}")
 
             if wake_word.lower() in transcription.lower():
-                print(f"'{wake_word}' detectado!")
+                print(f"'{wake_word}' detectado! Iniciando interação...")
                 return True
-            else:
-                return False
 
         except sr.UnknownValueError:
             # Se a transcrição não for compreensível, ignora
@@ -293,10 +291,6 @@ def main():
         # Fica ouvindo até que "Roboldo" seja detectado
         if detect_wake_word("robô"):
             capture_audio_and_respond()
-            continue
-        elif detect_wake_word("encerrar"):
-            delete_all_images()
-            break
 
 
 
