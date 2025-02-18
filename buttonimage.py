@@ -6,11 +6,21 @@ import pygame
 import threading
 import requests
 import cv2
+import serial
+import time
 
 client = OpenAI()
 CLIENT_ID = "e998866e6f8c481"
 IMAGE_PATH = "imagem.jpeg"
 DELETE_HASHES_FILE = "deletehashes.txt"
+
+arduino = serial.Serial('COM3', 9600, timeout=1)  # Altere 'COM3' conforme necessário
+time.sleep(2)
+
+def enviar_comando(comando):
+    arduino.write(comando.encode())
+    time.sleep(0.1)
+
 with open("template.txt", "r") as arquivo:
     inicio = arquivo.read()
 
@@ -249,10 +259,13 @@ def main():
         thread.start()        
         
         resposta = generate_response_with_image(transcription, link)
+        emocao = resposta[0]
         print(f"Resposta: {resposta}")
-        text_to_speech(resposta)
+        text_to_speech(resposta[1:])
         print("TEXTO PARA AUDIO")
+        enviar_comando("G")
         play_audio('resposta.mp3')
+        enviar_comando(emocao)
         print("AUDIO REPRODUZIDO")
     
 

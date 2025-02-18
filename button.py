@@ -4,13 +4,24 @@ import pyaudio
 import numpy as np
 import pygame
 import threading
+import time
+import serial
+
+
 
 client = OpenAI()
 with open("template.txt", "r") as arquivo:
     inicio = arquivo.read()
-
-
+    
+    
 historico = [{"role": "system", "content": inicio}]
+
+arduino = serial.Serial('COM3', 9600, timeout=1)  # Altere 'COM3' conforme necessário
+time.sleep(2)
+
+def enviar_comando(comando):
+    arduino.write(comando.encode())
+    time.sleep(0.1)
 
 def generate_response(prompt):
     historico.append({"role": "user", "content": prompt})
@@ -48,7 +59,7 @@ def capture_audio(filename="mensagem.wav"):
     CHANNELS = 1
     RATE = 44100
     CHUNK = 1024
-    SILENCE_THRESHOLD = 100  # Limite de silêncio (ajuste conforme necessário)
+    SILENCE_THRESHOLD = 500  # Limite de silêncio (ajuste conforme necessário)
     SILENCE_DURATION = 2  # Segundos de silêncio para parar a gravação
     OUTPUT_FILENAME = filename
 
@@ -146,10 +157,13 @@ def main():
         thread.start()        
         
         resposta = generate_response(transcription)
+        emocao = resposta[0]
         print(f"Resposta: {resposta}")
-        text_to_speech(resposta)
+        text_to_speech(resposta[1:])
         print("TEXTO PARA AUDIO")
+        enviar_comando("G")
         play_audio('resposta.mp3')
+        enviar_comando(emocao)
         print("AUDIO REPRODUZIDO")
     
 
