@@ -7,6 +7,11 @@ LedControl lc = LedControl(13, 12, 11, 5); // Pino 13 = DIN, Pino 12 = CLK, Pino
 
 //************************
 //  Definição das faces
+
+
+tenho esse programa que controla o rosto de um robô quero um programa python que ative as funções das expressões, e quero que faça de modo que uma função fique executando enquanto o arduino ainda espera por outro caractere
+
+
 //************************
 
 // olho neutro
@@ -283,40 +288,84 @@ void setup()
 //***************
 // Loop principal
 //***************
-void loop()
 {
   if (Serial.available() > 0) {
-    // Ler o comando serial
-    String input = Serial.readStringUntil('\n');
-    input.trim(); // Remove espaços em branco no início e no fim
-    int spaceIndex = input.indexOf(' ');
+    char input = Serial.read();
     
-    if (spaceIndex > 0) {
-      String eyeIndexStr = input.substring(0, spaceIndex);
-      String mouthIndexStr = input.substring(spaceIndex + 1);
-      
-      int eyeIndex = eyeIndexStr.toInt();
-      int mouthIndex = mouthIndexStr.toInt();
-      
-      // Verificar se os índices são válidos
-      if (eyeIndex >= 0 && eyeIndex < NUM_EYES && mouthIndex >= 0 && mouthIndex < NUM_MOUTHS) {
-        selectedEye = eyeIndex;
-        selectedMouth = mouthIndex;
-        
-        display_eyes(eyes[selectedEye], eyes[selectedEye]);
-        display_mouth(mouths[selectedMouth]);
-      } else {
-        Serial.println("Índices inválidos. Digite novamente.");
-      }
-    } else {
-      Serial.println("Entrada inválida. Digite o índice do olho e da boca separados por espaço.");
+    if (input == 'A') {
+      feliz();
+      executandoFalar = false;  // Para outras animações, se necessário
     }
+    if (input == 'B') {
+      triste();
+      executandoFalar = false;
+    }
+    if (input == 'C') {
+      bocaberta();
+      executandoFalar = false;
+    }
+    if (input == 'D') {
+      serio();
+      executandoFalar = false;
+    }
+    if (input == 'E') {
+      lingua();
+      executandoFalar = false;
+    }
+    if (input == 'F') {
+      surpreso();
+      executandoFalar = false;
+    }
+    if (input == 'G') {
+      executandoFalar = true;  // Ativa a animação de "falar"
+    }
+  }
+
+  // Se estiver falando, continua executando a animação
+  if (executandoFalar) {
+    falar();  // A função "falar" continua executando até receber novo comando
   }
 }
 
 //*******************
 // Funções auxiliares
 //*******************
+void feliz() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[1]);
+}
+void triste() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[0]);
+}
+void bocaberta() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[2]);
+}
+void serio() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[3]);
+}
+void lingua() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[4]);
+}
+void surpreso() {
+  display_eyes(eyes[0],eyes[0]);
+  display_mouth(mouths[5]);
+}
+
+void falar() {
+  while(1){
+    display_eyes(eyes[0],eyes[0]);
+    display_mouth(mouths[2]);
+    delay(500);
+    display_mouth(mouths[3]);
+    delay(500);
+  }
+  
+}
+
 
 // mudar olhos
 void display_eyes(byte right_eye[], byte left_eye[]) {
